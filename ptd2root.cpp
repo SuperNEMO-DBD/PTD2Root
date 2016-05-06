@@ -1,6 +1,6 @@
 // - Implementation of PTD2Root
 // Example on access to data in 'brio' files from flsimulate:
-// Uses the 'PTD' data bank 
+// Uses the 'PTD' data bank
 // 1) Access all available data in PTD data banks
 // 2) Write data to a flat TTree ROOT file
 
@@ -21,7 +21,7 @@ DPP_MODULE_REGISTRATION_IMPLEMENT(PTD2Root,"PTD2Root");
 
 // Construct
 PTD2Root::PTD2Root() : dpp::base_module()
-{ 
+{
   filename_output_="default.root";
 }
 
@@ -35,7 +35,7 @@ PTD2Root::~PTD2Root() {
 void PTD2Root::initialize(const datatools::properties& myConfig,
 			  datatools::service_manager& flServices,
 			  dpp::module_handle_dict_type& /*moduleDict*/) {
-  
+
   // Throw logic exception if we've already initialized this instance
   DT_THROW_IF(this->is_initialized(),
 	      std::logic_error,
@@ -70,7 +70,7 @@ void PTD2Root::initialize(const datatools::properties& myConfig,
 
   tree_ = new TTree("PTD","PTD");
   tree_->SetDirectory(hfile_);
-  
+
   // header data
   tree_->Branch("header.runnumber",&header_.runnumber_);
   tree_->Branch("header.eventnumber",&header_.eventnumber_);
@@ -111,9 +111,9 @@ void PTD2Root::initialize(const datatools::properties& myConfig,
 }
 
 // Process
-dpp::base_module::process_status PTD2Root::process(datatools::things& workItem) {  
+dpp::base_module::process_status PTD2Root::process(datatools::things& workItem) {
   // Local variables
-  
+
   // particle event data
   std::vector<int> particleid;
   std::vector<int> charge;
@@ -140,7 +140,7 @@ dpp::base_module::process_status PTD2Root::process(datatools::things& workItem) 
   std::vector<double> calo_loc_x;
   std::vector<double> calo_loc_y;
   std::vector<double> calo_loc_z;
-  
+
   // Access the workItem
 
   // look for reconstructed data
@@ -157,12 +157,12 @@ dpp::base_module::process_status PTD2Root::process(datatools::things& workItem) 
 
 	  particleid.push_back(the_particle.get_track_id());
 	  charge.push_back(the_particle.get_charge());
-	  
+
 	  // first the vertices
 	  if (the_particle.has_vertices()) {
 	    for (unsigned int i=0; i<the_particle.get_vertices().size();++i) {
 	      const geomtools::blur_spot & vertex = the_particle.get_vertices().at(i).get();
-	      const geomtools::vector_3d & translation  = vertex.get_placement().get_translation();	
+	      const geomtools::vector_3d & translation  = vertex.get_placement().get_translation();
 	      vertex_x.push_back(translation.x());
 	      vertex_y.push_back(translation.y());
 	      vertex_z.push_back(translation.z());
@@ -206,14 +206,14 @@ dpp::base_module::process_status PTD2Root::process(datatools::things& workItem) 
 		std::vector<geomtools::geom_id> gids;
 		the_mapping.compute_matching_geom_id(calo_hit.get_geom_id(), gids); // front calo block = last entry
 		const geomtools::geom_info & info = the_mapping.get_geom_info(gids.back()); // in vector gids
-		const geomtools::vector_3d & loc  = info.get_world_placement().get_translation();	
+		const geomtools::vector_3d & loc  = info.get_world_placement().get_translation();
 		calo_loc_x.push_back(loc.x());
 		calo_loc_y.push_back(loc.y());
 		calo_loc_z.push_back(loc.z());
 	      }
 	      else {
 		const geomtools::geom_info & info = the_mapping.get_geom_info(calo_hit.get_geom_id());
-		const geomtools::vector_3d & loc  = info.get_world_placement().get_translation();	
+		const geomtools::vector_3d & loc  = info.get_world_placement().get_translation();
 		calo_loc_x.push_back(loc.x());
 		calo_loc_y.push_back(loc.y());
 		calo_loc_z.push_back(loc.z());
@@ -224,7 +224,7 @@ dpp::base_module::process_status PTD2Root::process(datatools::things& workItem) 
 	      calotime.push_back(calo_hit.get_time());
 	      calosigmatime.push_back(calo_hit.get_sigma_time());
 	      calotype.push_back(calo_hit.get_geom_id().get_type());
-	      
+
 	      if (calo_hit.get_geom_id ().get_type () == 1302)
 		{
 		  // CALO
@@ -264,15 +264,15 @@ dpp::base_module::process_status PTD2Root::process(datatools::things& workItem) 
 	    calo_loc_y.push_back(1.0e4);
 	    calo_loc_z.push_back(1.0e4);
 	  }
-	  
-	  
+
+
 	  // then the trajectory length, always
 	  if (the_particle.has_trajectory()) {
 	    const snemo::datamodel::tracker_trajectory & the_trajectory = the_particle.get_trajectory();
 	    const snemo::datamodel::base_trajectory_pattern & the_base_pattern = the_trajectory.get_pattern();
 	    const geomtools::i_shape_1d & the_shape = the_base_pattern.get_shape();
 	    traj_length.push_back(the_shape.get_length());
-	    
+
 	    const snemo::datamodel::tracker_cluster & the_cluster = the_trajectory.get_cluster();
 	    traj_cl_delayed.push_back((int)the_cluster.is_delayed());
 	    if (the_cluster.is_delayed()>0)
@@ -287,7 +287,7 @@ dpp::base_module::process_status PTD2Root::process(datatools::things& workItem) 
 	  }
 	}
       }
-      else 
+      else
 	particle_.nofparticles_ = 0;
 
       // Extract un-associated calorimeter hits
@@ -302,19 +302,19 @@ dpp::base_module::process_status PTD2Root::process(datatools::things& workItem) 
 	    std::vector<geomtools::geom_id> gids;
 	    the_mapping.compute_matching_geom_id(un_calo_hit.get_geom_id(), gids); // front calo block = last entry
 	    const geomtools::geom_info & info = the_mapping.get_geom_info(gids.back()); // in vector gids
-	    const geomtools::vector_3d & loc  = info.get_world_placement().get_translation();	
+	    const geomtools::vector_3d & loc  = info.get_world_placement().get_translation();
 	    calo_loc_x.push_back(loc.x());
 	    calo_loc_y.push_back(loc.y());
 	    calo_loc_z.push_back(loc.z());
 	  }
 	  else {
 	    const geomtools::geom_info & info = the_mapping.get_geom_info(un_calo_hit.get_geom_id());
-	    const geomtools::vector_3d & loc  = info.get_world_placement().get_translation();	
+	    const geomtools::vector_3d & loc  = info.get_world_placement().get_translation();
 	    calo_loc_x.push_back(loc.x());
 	    calo_loc_y.push_back(loc.y());
 	    calo_loc_z.push_back(loc.z());
 	  }
-	  
+
 	  caloassociated.push_back(0);
 	  caloenergy.push_back(un_calo_hit.get_energy());
 	  calosigmaenergy.push_back(un_calo_hit.get_sigma_energy());
@@ -405,7 +405,7 @@ dpp::base_module::process_status PTD2Root::process(datatools::things& workItem) 
     }
 
   tree_->Fill();
-  
+
   // MUST return a status, see ref dpp::processing_status_flags_type
   return dpp::base_module::PROCESS_OK;
 }
@@ -415,9 +415,9 @@ void PTD2Root::reset() {
   // write the output, finished streaming
   hfile_->cd();
   tree_->Write();
-  hfile_->Close(); // 
+  hfile_->Close(); //
   std::cout << "In reset: finished conversion, file closed " << std::endl;
-  
+
   // clean up
   delete hfile_;
   filename_output_ = "default.root";
