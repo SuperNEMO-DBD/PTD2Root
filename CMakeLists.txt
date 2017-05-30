@@ -2,7 +2,7 @@
 # Check version meets ou requirements
 # Declare project, which will configure compiler for us
 cmake_minimum_required(VERSION 3.3)
-project(PTD2Root VERSION 0.1.0)
+project(PTD2Root VERSION 1.0.0)
 
 # Will install module and support program
 include(GNUInstallDirs)
@@ -10,11 +10,11 @@ include(GNUInstallDirs)
 # Module uses Falaise, so we need to locate this or fail
 find_package(Falaise REQUIRED)
 
-# Ensure our code can see the Falaise etc headers
-include_directories(${Falaise_INCLUDE_DIRS})
-
 # Build a dynamic library from our sources
 add_library(PTD2Root SHARED ptd2root.h ptd2root.cpp)
+
+# Link it to the FalaiseModule target to pick up dependencies
+target_link_libraries(PTD2Root Falaise::FalaiseModule)
 
 # - Don't link directly as Bayeux/Falaise will export the
 #   needed symbols.

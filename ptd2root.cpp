@@ -50,8 +50,7 @@ void PTD2Root::initialize(const datatools::properties& myConfig,
   }
 
   // Look for services
-  if (flServices.has("geometry"));
-  {
+  if (flServices.has("geometry")) {
     const geomtools::geometry_service& GS = flServices.get<geomtools::geometry_service> ("geometry");
 
     // initialize geometry manager

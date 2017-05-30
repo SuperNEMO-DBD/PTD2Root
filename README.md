@@ -7,7 +7,7 @@ Installing
 PTD2Root requires the following software:
 
 - CMake 3.3 or higher
-- Falaise 2.0 or higher
+- Falaise 3.0 or higher
   - Falaise will provide the needed Bayeux and ROOT dependencies
 
 These packages can easily be obtained through the cadfaelbrew package manager.
